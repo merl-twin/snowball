@@ -25,6 +25,11 @@ rust_src_dir = $(rust_src_main_dir)/snowball/algorithms
 ICONV = iconv
 #ICONV = python ./iconv.py
 
+tests_dir = tests
+tests_dir_abs = $(abspath $(tests_dir))
+
+test_cases = $(shell ls ${tests_dir})
+
 libstemmer_algorithms = arabic \
 			danish dutch english finnish french german hungarian \
 			italian \
@@ -107,7 +112,8 @@ JAVA_SOURCES = $(libstemmer_algorithms:%=$(java_src_dir)/%Stemmer.java)
 PYTHON_SOURCES = $(libstemmer_algorithms:%=$(python_output_dir)/%_stemmer.py) \
 		 $(python_output_dir)/__init__.py
 JSX_SOURCES = $(libstemmer_algorithms:%=$(jsx_output_dir)/%-stemmer.jsx)
-RUST_SOURCES = $(libstemmer_algorithms:%=$(rust_src_dir)/%_stemmer.rs)
+RUST_SOURCES = $(libstemmer_algorithms:%=$(rust_src_dir)/%_stemmer.rs) \
+	       $(test_cases:%=$(rust_src_dir)/%_stemmer.rs)
 
 COMPILER_OBJECTS=$(COMPILER_SOURCES:.c=.o)
 RUNTIME_OBJECTS=$(RUNTIME_SOURCES:.c=.o)
@@ -227,6 +233,13 @@ $(python_output_dir)/__init__.py:
 $(rust_src_dir)/%_stemmer.rs: algorithms/%/stem_Unicode.sbl snowball
 	@mkdir -p $(rust_src_dir)
 	@l=`echo "$<" | sed 's!\(.*\)/stem_Unicode.sbl$$!\1!;s!^.*/!!'`; \
+	o="$(rust_src_dir)/$${l}_stemmer"; \
+	echo "./snowball $< -rust -o $${o}"; \
+	./snowball $< -rust -o $${o}
+
+$(rust_src_dir)/%_stemmer.rs: tests/%/stem.sbl snowball
+	@mkdir -p $(rust_src_dir)
+	@l=`echo "$<" | sed 's!\(.*\)/stem.sbl$$!\1!;s!^.*/!!'`; \
 	o="$(rust_src_dir)/$${l}_stemmer"; \
 	echo "./snowball $< -rust -o $${o}"; \
 	./snowball $< -rust -o $${o}
@@ -456,7 +469,7 @@ THIN_FACTOR ?= 3
 # take a long time (unless you use pypy).
 THIN_TEST_DATA := awk '(FNR % $(THIN_FACTOR) == 0){print}'
 
-check_rust: $(RUST_SOURCES) $(libstemmer_algorithms:%=check_rust_%)
+check_rust: $(RUST_SOURCES) $(test_cases:%=test_rust_%) $(libstemmer_algorithms:%=check_rust_%)
 
 check_rust_%: $(STEMMING_DATA_ABS)/% 
 	@echo "Checking output of `echo $<|sed 's!.*/!!'` stemmer for Rust"
@@ -473,6 +486,12 @@ check_rust_%: $(STEMMING_DATA_ABS)/%
 	  diff -u $</output.txt tmp.txt; \
 	fi
 	@rm tmp.txt
+
+test_rust_%: $(tests_dir_abs)/%
+	@echo "Checking output of `echo $<|sed 's!.*/!!'` stemmer for Rust"
+	@cd rust && $(cargo) run $(cargoflags) -- -l `echo $<|sed 's!.*/!!'` -i $</input.txt -o $(PWD)/tmp.txt; \
+	diff -u $</output.txt $(PWD)/tmp.txt; \
+	rm $(PWD)/tmp.txt
 
 check_jsx_%: $(STEMMING_DATA)/% jsx_stemwords
 	@echo "Checking output of `echo $<|sed 's!.*/!!'` stemmer for JSX"

@@ -1,0 +1,15 @@
+strings (x y z)
+integers ( p1 )
+routines ( setvars checkit doit )
+externals (stem)
+
+define setvars as ( $z = 'ing' $x = 'ingly' $y = z $z checkit)
+
+define checkit as ($p1 = limit)
+
+backwardmode (define doit as ( [x] <- y ))
+
+define stem as (
+    setvars
+    backwards doit
+)
