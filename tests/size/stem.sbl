@@ -1,0 +1,9 @@
+externals ( stem )
+
+integers ( zero )
+
+define stem as (
+    $zero = 0
+    $zero == size
+    <- '<empty>'
+)

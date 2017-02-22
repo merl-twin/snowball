@@ -1,0 +1,3 @@
+externals (stem)
+integers (x)
+define stem as ( $x = maxint $x = minint )
