@@ -1215,8 +1215,8 @@ static void generate(struct generator * g, struct node * p) {
 
 static void generate_start_comment(struct generator * g) {
 
-    w(g, "//! This file was generated automatically by the Snowball to Rust compiler~N");
-    w(g, "//! http://snowballstem.org/~N~N");
+    w(g, "// This file was generated automatically by the Snowball to Rust compiler~N");
+    w(g, "// http://snowballstem.org/~N~N");
 }
 
 /* rustc emits warnings if variables don't match the style guide */
@@ -1225,10 +1225,10 @@ static void generate_start_comment(struct generator * g) {
 /* consistency with snowball variable namings we allow some kind of warnings here */
 static void generate_allow_warnings(struct generator * g) {
 
-    w(g, "#![allow(non_upper_case_globals)]~N");
-    w(g, "#![allow(non_snake_case)]~N");
-    w(g, "#![allow(unused_variables)]~N");
-    w(g, "#![allow(unused_mut)]~N");
+    //w(g, "#![allow(non_upper_case_globals)]~N");
+    //w(g, "#![allow(non_snake_case)]~N");
+    //w(g, "#![allow(unused_variables)]~N");
+    //w(g, "#![allow(unused_mut)]~N");
 }
 
 static void generate_class_begin(struct generator * g) {
